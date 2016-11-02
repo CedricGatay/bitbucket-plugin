@@ -29,6 +29,8 @@ import hudson.model.AbstractBuild;
 import net.sf.json.JSONObject;
 
 import javax.annotation.Nonnull;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Represents the payload of the pull request
@@ -49,9 +51,13 @@ public class PullRequestPayload extends BitbucketPayload {
 
         String branch = source.getJSONObject("branch").getString("name");
         envVars.put("BITBUCKET_BRANCH", branch);
+        LOGGER.log(Level.FINEST, "Injecting BITBUCKET_BRANCH: {0}", branch);
 
         String pullRequestUrl = pullRequest.getJSONObject("links").getJSONObject("html").getString("href");
         envVars.put("PULL_REQUEST_LINK", pullRequestUrl);
+        LOGGER.log(Level.FINEST, "Injecting PULL_REQUEST_LINK: {0}", pullRequestUrl);
     }
+
+    private static final Logger LOGGER = Logger.getLogger(PullRequestPayload.class.getName());
 
 }

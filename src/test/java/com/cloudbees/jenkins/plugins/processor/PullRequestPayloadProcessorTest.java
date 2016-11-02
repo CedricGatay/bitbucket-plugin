@@ -80,6 +80,35 @@ public class PullRequestPayloadProcessorTest {
     }
 
     @Test
+    public void testProcessPullRequestMergeWebhookGit() {
+        // Set headers so that payload processor will parse as new Webhook payload
+        when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");
+        when(request.getHeader("x-event-key")).thenReturn("pullrequest:fulfilled");
+
+        String user = "test_user";
+        String url = "https://bitbucket.org/test_user/test_repo";
+
+        BitbucketEvent bitbucketEvent = new BitbucketEvent(request.getHeader("x-event-key"));
+
+        pullRequestPayloadProcessor = new PullRequestPayloadProcessor(probe, bitbucketEvent);
+
+        JSONObject payload = new JSONObject()
+                .element("actor", new JSONObject()
+                        .element("username", user))
+                .element("repository", new JSONObject()
+                        .element("links", new JSONObject()
+                                .element("html", new JSONObject()
+                                        .element("href", url))));
+
+        pullRequestPayloadProcessor.processPayload(payload);
+
+        verify(probe).triggetMatchingJobs(eventCaptor.capture(), payloadCaptor.capture());
+
+        assertEquals(bitbucketEvent, eventCaptor.getValue());
+        assertEquals(payload, payloadCaptor.getValue().getPayload());
+    }
+
+    @Test
     public void testProcessPullRequestApprovalWebhookHg() {
         // Set headers so that payload processor will parse as new Webhook payload
         when(request.getHeader("user-agent")).thenReturn("Bitbucket-Webhooks/2.0");

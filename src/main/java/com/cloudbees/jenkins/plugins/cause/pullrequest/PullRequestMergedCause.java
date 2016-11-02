@@ -22,29 +22,28 @@
  * THE SOFTWARE.
  */
 
-package com.cloudbees.jenkins.plugins.filter.pullrequest;
+package com.cloudbees.jenkins.plugins.cause.pullrequest;
 
-import com.cloudbees.jenkins.plugins.BitbucketEvent;
-import com.cloudbees.jenkins.plugins.filter.BitbucketEventTriggerMatcher;
-import com.cloudbees.jenkins.plugins.filter.BitbucketTriggerFilter;
+import com.cloudbees.jenkins.plugins.cause.BitbucketTriggerCause;
+import com.cloudbees.jenkins.plugins.payload.BitbucketPayload;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
- * {link @code PullRequestTriggerMatcher} for {link @BitbucketEventTriggerMatcher}
+ * The {@link PullRequestMergedCause} which represents a type of {@link BitbucketTriggerCause}
  * @since August 1, 2016
  * @version 2.0
  */
-public class PullRequestTriggerMatcher implements BitbucketEventTriggerMatcher {
+public class PullRequestMergedCause extends BitbucketTriggerCause {
+    public PullRequestMergedCause(File pollingLog, BitbucketPayload bitbucketPayload) throws IOException {
+        super(pollingLog, bitbucketPayload);
+    }
+
     @Override
-    public boolean matchesAction(BitbucketEvent bitbucketEvent, BitbucketTriggerFilter triggerFilter) {
-        if(BitbucketEvent.PULL_REQUEST_ACTIONS.APPROVED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof PullRequestApprovedActionFilter) {
-            return true;
-        }
-        if(BitbucketEvent.PULL_REQUEST_ACTIONS.MERGED.equals(bitbucketEvent.getAction()) &&
-                triggerFilter.getActionFilter() instanceof PullRequestMergedActionFilter) {
-            return true;
-        }
-        return false;
+    public String getShortDescription() {
+        String pusher = bitbucketPayload.getUser() != null ? bitbucketPayload.getUser() : "";
+        return "Started by Bitbucket pull request merged by " + pusher;
     }
 
 }
